@@ -27,8 +27,12 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install deps
-        run: npm ci
+      - name: Prepare deps (mac optional deps workaround)
+        run: |
+          rm -f package-lock.json
+          rm -rf node_modules
+          npm cache clean --force
+          npm install --no-audit --no-fund
 
       - name: Disable code signing
         run: echo "CSC_IDENTITY_AUTO_DISCOVERY=false" >> $GITHUB_ENV
