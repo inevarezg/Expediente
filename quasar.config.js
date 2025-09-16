@@ -79,6 +79,13 @@ export default defineConfig((ctx) => ({
     builder: {
       appId: 'expediente.app',
       productName: 'expediente',
+      mac: {
+        target: ['dmg', 'zip'],
+        identity: null,
+        hardenedRuntime: false,
+        artifactName: '${productName}-${version}-${arch}.${ext}',
+      },
+      dmg: { sign: false },
       extraResources: [
         // copia el preload al directorio de resources para poder leerlo con process.resourcesPath
         { from: 'src-electron/electron-preload.js', to: 'electron-preload.js' },
