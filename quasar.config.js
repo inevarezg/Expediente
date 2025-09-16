@@ -85,6 +85,7 @@ export default defineConfig((ctx) => ({
         hardenedRuntime: false,
         artifactName: '${productName}-${version}-${arch}.${ext}',
       },
+      publish: 'never',
       dmg: { sign: false },
       extraResources: [
         // copia el preload al directorio de resources para poder leerlo con process.resourcesPath
