@@ -92,6 +92,7 @@ export default defineConfig((ctx) => ({
         // OPCIONAL: si prefieres forzar el WASM en resources (y NO depender de public)
         // { from: 'public/sql-wasm.wasm', to: 'sql-wasm.wasm' }
       ],
+      publish: [],
       directories: {
         output: 'dist/electron',
       },
