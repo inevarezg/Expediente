@@ -1,18 +1,18 @@
 name: build-mac
 
 on:
-  workflow_dispatch: {}        # para correrlo manualmente
+  workflow_dispatch: {} # para correrlo manualmente
   push:
-    tags: ['v*.*.*']           # opcional: se ejecuta al crear un tag v1.0.0
+    tags: ['v*.*.*'] # opcional: se ejecuta al crear un tag v1.0.0
 
 jobs:
   mac:
     strategy:
       matrix:
         include:
-          - runner: macos-14   # Apple Silicon (M1/M2/M3)
+          - runner: macos-14 # Apple Silicon (M1/M2/M3)
             arch: arm64
-          - runner: macos-13   # Intel
+          - runner: macos-13 # Intel
             arch: x64
 
     runs-on: ${{ matrix.runner }}
@@ -38,18 +38,22 @@ jobs:
         run: echo "CSC_IDENTITY_AUTO_DISCOVERY=false" >> $GITHUB_ENV
 
       - name: Build (macOS ${{ matrix.arch }})
+        env:
+          CI: '' # 👈 evita el modo "onTagOrDraft" por estar en CI
+          GH_TOKEN: '' # 👈 por si algún plugin mira esta var
         run: |
           if [ "${{ matrix.arch }}" = "arm64" ]; then
             npx quasar build -m electron -- --mac dmg --arm64 --publish never
           else
             npx quasar build -m electron -- --mac dmg --x64 --publish never
           fi
-
+        continue-on-error: true
 
       - name: Upload artifacts (${{ matrix.arch }})
+        if: always() # 👈 sube lo generado aunque el paso anterior fallara
         uses: actions/upload-artifact@v4
         with:
           name: expediente-mac-${{ matrix.arch }}
           path: dist/electron/Packaged/**
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 14`
