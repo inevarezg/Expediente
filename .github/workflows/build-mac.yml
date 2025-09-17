@@ -38,6 +38,8 @@ jobs:
         run: echo "CSC_IDENTITY_AUTO_DISCOVERY=false" >> $GITHUB_ENV
 
       - name: Build (macOS ${{ matrix.arch }})
+        env:
+          CI: ""   # evita auto-publicar por estar en CI
         run: |
           if [ "${{ matrix.arch }}" = "arm64" ]; then
             npx quasar build -m electron -- --mac dmg --arm64 --publish never
