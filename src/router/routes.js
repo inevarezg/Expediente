@@ -1,3 +1,5 @@
+//import RecetaPage from 'pages/RecetaPage.vue'
+
 const routes = [
   {
     path: '/',
@@ -27,6 +29,26 @@ const routes = [
         path: '/expedientes',
         name: 'HistorialExpediente',
         component: () => import('pages/HistorialExpedientePage.vue'),
+      },
+      {
+        path: '/medicamentos',
+        component: () => import('pages/MedicamentosPage.vue'),
+      },
+      {
+        path: '/receta/:pacienteId?',
+        name: 'Receta',
+        component: () => import('pages/RecetaPage.vue'),
+      },
+      // {
+      //   path: '/receta/:pacienteId',
+      //   name: 'Receta',
+      //   component: RecetaPage,
+      //   props: true, // <--- importante
+      // },
+      {
+        path: '/receta/:pacienteId/:consultaId?', // 👈 consultaId es opcional
+        name: 'Receta',
+        component: () => import('pages/RecetaPage.vue'),
       },
     ],
   },

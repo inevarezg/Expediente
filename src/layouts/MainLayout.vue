@@ -1,12 +1,8 @@
 <template>
   <q-layout view="lHh Lpr lFf">
     <q-header elevated>
-      <q-toolbar>
-        <q-btn flat dense round icon="menu" aria-label="Menu" @click="toggleLeftDrawer" />
-
-        <q-toolbar-title> </q-toolbar-title>
-
-        <div></div>
+      <q-toolbar style="background-color: #c4b193">
+        <!-- <q-btn flat dense round icon="menu" aria-label="Menu" @click="toggleLeftDrawer" /> -->
       </q-toolbar>
     </q-header>
 
@@ -25,7 +21,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+// import { ref } from 'vue'
 // import EssentialLink from 'components/EssentialLink.vue'
 
 // const linksList = [
@@ -73,9 +69,9 @@ import { ref } from 'vue'
 //   },
 // ]
 
-const leftDrawerOpen = ref(false)
+// const leftDrawerOpen = ref(false)
 
-function toggleLeftDrawer() {
-  leftDrawerOpen.value = !leftDrawerOpen.value
-}
+// function toggleLeftDrawer() {
+//   leftDrawerOpen.value = !leftDrawerOpen.value
+// }
 </script>

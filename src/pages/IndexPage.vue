@@ -1,3 +1,4 @@
+<!-- src/pages/IndexPage.vue -->
 <template>
   <q-page class="bg-page">
     <!-- Header -->
@@ -50,6 +51,23 @@
             @click="goTo('/consulta/nueva')"
           />
         </q-card>
+
+        <!-- Catálogo de Medicamentos -->
+        <q-card class="card card--green" flat bordered>
+          <div class="card__icon card__icon--green">
+            <q-icon name="local_pharmacy" size="40px" />
+          </div>
+          <div class="card__body">
+            <div class="card__title">Catálogo de Medicamentos</div>
+            <div class="card__text">Gestionar listado de medicamentos disponibles</div>
+          </div>
+          <q-btn color="green" class="card__btn" label="Acceder" @click="goTo('/medicamentos')" />
+        </q-card>
+      </div>
+
+      <!-- Panel de Respaldo/Restauración -->
+      <div class="q-mt-xl">
+        <backup-restore-panel />
       </div>
     </div>
   </q-page>
@@ -59,9 +77,11 @@
 import logoDark from 'assets/Logo_IVES-06.png'
 import logoLight from 'assets/Logo_IVES-30 (4).jpg'
 import logoBeige from 'assets/Logo_IVES-22 (2).jpg'
+import BackupRestorePanel from './BackupRestorePanel.vue'
 
 export default {
   name: 'IndexPage',
+  components: { BackupRestorePanel },
   data() {
     return {
       // Elige el que prefieras para el header:
@@ -86,7 +106,7 @@ export default {
 }
 .container {
   max-width: 1100px;
-  margin: 0 auto;
+  margin: 40px auto;
   padding: 24px 16px 64px;
 }
 
@@ -194,11 +214,19 @@ export default {
   height: 42px;
 }
 
-/* Variantes de borde superior suave para cada tarjeta (como las tarjetas de tu captura) */
+/* Variantes de borde superior suave para cada tarjeta */
 .card--blue {
   border-top: 6px solid rgba(29, 78, 216, 0.15);
 }
 .card--orange {
   border-top: 6px solid rgba(234, 88, 12, 0.18);
+}
+.card--green {
+  border-top: 6px solid rgba(16, 185, 129, 0.25);
+}
+.card__icon--green {
+  background: #d1fae5;
+  color: #059669;
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.15);
 }
 </style>

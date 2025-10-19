@@ -9,9 +9,9 @@
           <div class="row q-col-gutter-md">
             <div class="col-12 col-sm-6">
               <q-card clickable bordered class="q-pa-md items-center column" @click="chooseNew">
-                <q-avatar size="56px" class="bg-green-1 text-green"
-                  ><q-icon name="person_add"
-                /></q-avatar>
+                <q-avatar size="56px" class="bg-green-1 text-green">
+                  <q-icon name="person_add" />
+                </q-avatar>
                 <div class="q-mt-sm text-center">Nuevo paciente</div>
               </q-card>
             </div>
@@ -22,9 +22,9 @@
                 class="q-pa-md items-center column"
                 @click="chooseFollowUp"
               >
-                <q-avatar size="56px" class="bg-blue-1 text-blue"
-                  ><q-icon name="history"
-                /></q-avatar>
+                <q-avatar size="56px" class="bg-blue-1 text-blue">
+                  <q-icon name="history" />
+                </q-avatar>
                 <div class="q-mt-sm text-center">Dar seguimiento</div>
               </q-card>
             </div>
@@ -36,231 +36,6 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
-
-    <div class="ives-sheet">
-      <!-- Logo -->
-      <div class="ives-logo-wrap">
-        <img :src="logo" alt="IVES" class="ives-logo" />
-      </div>
-
-      <!-- Título -->
-      <h2 class="ives-h2">HISTORIA CLINICA</h2>
-
-      <!-- ========= PRIMERA VEZ ========= -->
-      <div v-if="isNew">
-        <!-- Tabla 1 -->
-        <div class="ives-grid ives-table">
-          <div class="ives-cell">
-            <span class="lbl">NOMBRE</span>
-            <input v-model="firstForm.nombre" class="ipt" type="text" />
-          </div>
-          <div class="ives-cell">
-            <span class="lbl">GENERO</span>
-            <input v-model="firstForm.genero" class="ipt" type="text" placeholder="F / M / Otro" />
-          </div>
-
-          <div class="ives-cell">
-            <span class="lbl">FECHA NACIMIENTO:</span>
-            <input
-              v-model="firstForm.fecha_nacimiento"
-              class="ipt"
-              type="text"
-              placeholder="YYYY-MM-DD"
-            />
-          </div>
-          <div class="ives-cell">
-            <span class="lbl">EDAD:</span>
-            <input v-model="firstForm.edad" class="ipt" type="text" />
-          </div>
-
-          <div class="ives-cell ives-span-2">
-            <span class="lbl">DIRECCION:</span>
-            <input v-model="firstForm.direccion" class="ipt" type="text" />
-          </div>
-
-          <div class="ives-cell">
-            <span class="lbl">CIUDAD DE ORIGEN:</span>
-            <input v-model="firstForm.ciudad_origen" class="ipt" type="text" />
-          </div>
-          <div class="ives-cell">
-            <span class="lbl">PROFESION:</span>
-            <input v-model="firstForm.profesion" class="ipt" type="text" />
-          </div>
-
-          <div class="ives-cell">
-            <span class="lbl">FECHA ACTUAL:</span>
-            <input v-model="firstForm.fecha_actual" class="ipt" type="text" readonly />
-          </div>
-          <div class="ives-cell">
-            <span class="lbl">CELULAR:</span>
-            <input v-model="firstForm.celular" class="ipt" type="text" />
-          </div>
-        </div>
-
-        <!-- Motivo -->
-        <h3 class="ives-h3">MOTIVO DE CONSULTA</h3>
-        <div class="ives-textarea">
-          <textarea v-model="firstForm.motivo_consulta" />
-        </div>
-
-        <!-- Antecedentes -->
-        <h3 class="ives-h3">ANTECEDENTES</h3>
-        <div class="ives-table ives-antecedentes">
-          <div class="ives-row3">
-            <label class="chk"
-              ><input type="checkbox" v-model="firstForm.embarazo" /> ( ) EMBARAZO</label
-            >
-            <label class="chk"
-              ><input type="checkbox" v-model="firstForm.lactancia" /> ( ) LACTANCIA</label
-            >
-            <label class="chk"
-              ><input type="checkbox" v-model="firstForm.trastornos_coagulacion" /> ( ) TRASTORNOS
-              COAGULACION</label
-            >
-          </div>
-          <div class="ives-row3">
-            <label class="chk"
-              ><input type="checkbox" v-model="firstForm.diabetes" /> ( ) DIABETES</label
-            >
-            <label class="chk"
-              ><input type="checkbox" v-model="firstForm.hipertension" /> ( ) HIPERTENSION</label
-            >
-            <label class="chk"
-              ><input type="checkbox" v-model="firstForm.enf_cardiovascular" /> ( ) ENF
-              CARDIOVASCULAR</label
-            >
-          </div>
-          <div class="ives-row3">
-            <label class="chk"
-              ><input type="checkbox" v-model="firstForm.enf_autoinmune" /> ( ) ENF
-              AUTOINMUNE</label
-            >
-            <label class="chk"
-              ><input type="checkbox" v-model="firstForm.epilepsia" /> ( ) EPILEPSIA O
-              CONVULSIONES</label
-            >
-            <label class="chk"><input type="checkbox" v-model="firstForm.asma" /> ( ) ASMA</label>
-          </div>
-
-          <div class="ives-cell ives-span-2">
-            <span class="lbl">Alergias específicas:</span>
-            <input v-model="firstForm.alergias" class="ipt" type="text" />
-          </div>
-          <div class="ives-cell ives-span-2">
-            <span class="lbl">Cirugias o tratamientos previos:</span>
-            <input v-model="firstForm.cirugias_previas" class="ipt" type="text" />
-          </div>
-          <div class="ives-cell ives-span-2">
-            <span class="lbl">Medicamentos:</span>
-            <input v-model="firstForm.medicamentos" class="ipt" type="text" />
-          </div>
-          <div class="ives-cell ives-span-2">
-            <span class="lbl">Alcoholismo, tabaquismo, drogas:</span>
-            <input v-model="firstForm.habitos" class="ipt" type="text" />
-          </div>
-          <div class="ives-cell ives-span-2">
-            <span class="lbl">Otros:</span>
-            <input v-model="firstForm.otros" class="ipt" type="text" />
-          </div>
-        </div>
-
-        <!-- Signos -->
-        <h3 class="ives-h3">SIGNOS</h3>
-        <div class="ives-grid ives-table">
-          <div class="ives-cell">
-            <span class="lbl">( ) PESO</span><input v-model="firstForm.peso" class="ipt" />
-          </div>
-          <div class="ives-cell">
-            <span class="lbl">( ) ESTATURA</span><input v-model="firstForm.estatura" class="ipt" />
-          </div>
-          <div class="ives-cell">
-            <span class="lbl">( ) IMC</span><input v-model="firstForm.imc" class="ipt" />
-          </div>
-          <div class="ives-cell">
-            <span class="lbl">( ) T/A</span><input v-model="firstForm.ta" class="ipt" />
-          </div>
-          <div class="ives-cell">
-            <span class="lbl">( ) FC</span><input v-model="firstForm.fc" class="ipt" />
-          </div>
-          <div class="ives-cell">
-            <span class="lbl">( ) TEMP</span><input v-model="firstForm.temp" class="ipt" />
-          </div>
-        </div>
-
-        <!-- Antecedentes hereditarios -->
-        <h3 class="ives-h3">ANTECEDENTES HEREDITARIOS</h3>
-        <div class="ives-textarea">
-          <textarea v-model="firstForm.antecedentes_hered" />
-        </div>
-
-        <div class="q-mt-lg flex justify-end q-gutter-sm">
-          <q-btn flat label="Cancelar" @click="cancel" />
-          <q-btn
-            color="primary"
-            label="Guardar primera consulta"
-            :loading="loading"
-            @click="saveFirstTime"
-          />
-        </div>
-      </div>
-
-      <!-- ========= SEGUIMIENTO ========= -->
-      <div v-else>
-        <div class="q-mb-md">
-          <q-select
-            v-model="selectedPatientId"
-            label="Selecciona paciente"
-            use-input
-            input-debounce="300"
-            :options="patientOptions"
-            option-label="label"
-            option-value="id"
-            emit-value
-            map-options
-            outlined
-            dense
-            @filter="filterPatients"
-          />
-        </div>
-
-        <h3 class="ives-h3">MOTIVO DE CONSULTA</h3>
-        <div class="ives-textarea">
-          <textarea v-model="followForm.motivo" />
-        </div>
-
-        <h3 class="ives-h3">SIGNOS</h3>
-        <div class="ives-grid ives-table">
-          <div class="ives-cell">
-            <span class="lbl">( ) PESO</span><input v-model="followForm.peso" class="ipt" />
-          </div>
-          <div class="ives-cell">
-            <span class="lbl">( ) T/A</span><input v-model="followForm.ta" class="ipt" />
-          </div>
-          <div class="ives-cell">
-            <span class="lbl">( ) FC</span><input v-model="followForm.fc" class="ipt" />
-          </div>
-          <div class="ives-cell">
-            <span class="lbl">( ) TEMP</span><input v-model="followForm.temp" class="ipt" />
-          </div>
-        </div>
-
-        <h3 class="ives-h3">OBSERVACIONES</h3>
-        <div class="ives-textarea">
-          <textarea v-model="followForm.observaciones" />
-        </div>
-
-        <div class="q-mt-lg flex justify-end q-gutter-sm">
-          <q-btn flat label="Cancelar" @click="cancel" />
-          <q-btn
-            color="primary"
-            label="Guardar consulta"
-            :disable="!selectedPatientId"
-            :loading="loading"
-            @click="saveFollowUp"
-          />
-        </div>
-      </div>
-    </div>
   </q-page>
 </template>
 
@@ -268,22 +43,22 @@
 import logo from 'assets/Logo_IVES-22 (2).jpg'
 import { getDb } from 'boot/sqljs'
 
+let tablesEnsured = false
+
 export default {
   name: 'ConsultaPage',
   data() {
     const d = new Date()
-    const hoy = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    const hoy = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
+      d.getDate(),
+    ).padStart(2, '0')}`
     return {
       logo,
       choiceDialog: true,
       isNew: true,
       loading: false,
-
-      // seguimiento
       selectedPatientId: null,
       patientOptions: [],
-
-      // primera vez
       firstForm: {
         nombre: '',
         genero: '',
@@ -317,8 +92,6 @@ export default {
         temp: '',
         antecedentes_hered: '',
       },
-
-      // seguimiento
       followForm: { motivo: '', peso: '', ta: '', fc: '', temp: '', observaciones: '' },
     }
   },
@@ -326,7 +99,6 @@ export default {
     this.ensureTables()
   },
   methods: {
-    // flujo
     chooseNew() {
       this.isNew = true
       this.choiceDialog = false
@@ -339,37 +111,27 @@ export default {
       this.$router.push('/')
     },
 
-    // ========= DB =========
+    // Solo se ejecuta una vez
     ensureTables() {
-      const db = getDb()
+      if (tablesEnsured) return
+      tablesEnsured = true
 
-      // Crea tabla si no existe (con el esquema completo actual)
+      const db = getDb()
       db.run(`
         CREATE TABLE IF NOT EXISTS pacientes (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           nombre TEXT NOT NULL,
-          genero TEXT,
-          fecha_nacimiento TEXT,
-          edad TEXT,
-          direccion TEXT,
-          ciudad_origen TEXT,
-          profesion TEXT,
-          celular TEXT,
-          email TEXT,
-          alergias TEXT,
-          antecedentes TEXT,
+          genero TEXT, fecha_nacimiento TEXT, edad TEXT, direccion TEXT,
+          ciudad_origen TEXT, profesion TEXT, celular TEXT, email TEXT,
+          alergias TEXT, antecedentes TEXT,
           created_at TEXT DEFAULT (datetime('now'))
         );
       `)
-
-      // MIGRACIÓN: agrega columnas que falten en DBs antiguas
       const colsRes = db.exec('PRAGMA table_info(pacientes);')
       const existing = (colsRes[0]?.values || []).map((v) => String(v[1]))
-
       const addIfMissing = (name, defSql) => {
         if (!existing.includes(name)) db.run(`ALTER TABLE pacientes ADD COLUMN ${defSql};`)
       }
-
       addIfMissing('genero', 'genero TEXT')
       addIfMissing('fecha_nacimiento', 'fecha_nacimiento TEXT')
       addIfMissing('edad', 'edad TEXT')
@@ -382,16 +144,14 @@ export default {
       addIfMissing('antecedentes', 'antecedentes TEXT')
       addIfMissing('created_at', "created_at TEXT DEFAULT (datetime('now'))")
 
-      // Tabla consultas
       db.run(`
         CREATE TABLE IF NOT EXISTS consultas (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           paciente_id INTEGER NOT NULL,
           fecha TEXT DEFAULT (datetime('now')),
-          tipo TEXT,
-          motivo TEXT,
-          signos_peso TEXT, signos_ta TEXT, signos_fc TEXT, signos_temp TEXT, signos_estatura TEXT, signos_imc TEXT,
-          detalles TEXT
+          tipo TEXT, motivo TEXT,
+          signos_peso TEXT, signos_ta TEXT, signos_fc TEXT, signos_temp TEXT,
+          signos_estatura TEXT, signos_imc TEXT, detalles TEXT
         );
       `)
     },
@@ -539,7 +299,6 @@ export default {
       }
     },
 
-    // Guardar a archivo si tienes Electron preload con writeDb (opcional)
     async persistIfAvailable() {
       try {
         const db = getDb()
@@ -549,14 +308,12 @@ export default {
         }
       } catch (e) {
         console.log(e)
-
-        /* ignore cuando no hay electron */
       }
     },
 
-    // Búsqueda para seguimiento
+    // Optimizada: consulta con límite y pequeño yield
     filterPatients(val, update) {
-      update(() => {
+      update(async () => {
         const db = getDb()
         const like = `%${(val || '').trim()}%`
         const stmt = db.prepare(`
@@ -564,11 +321,13 @@ export default {
           FROM pacientes
           WHERE nombre LIKE ? OR genero LIKE ? OR ciudad_origen LIKE ? OR profesion LIKE ?
           ORDER BY id DESC
+          LIMIT 50
         `)
         const rows = []
         stmt.bind([like, like, like, like])
         while (stmt.step()) rows.push(stmt.getAsObject())
         stmt.free()
+        await new Promise((r) => setTimeout(r, 0))
         this.patientOptions = rows
       })
     },

@@ -1,4 +1,42 @@
 <template>
+  <q-header elevated>
+    <q-toolbar style="background-color: #c4b193">
+      <!-- <q-btn flat dense round icon="menu" aria-label="Menu" @click="toggleLeftDrawer" /> -->
+
+      <div v-if="mode === 'seguimiento'" class="col-12 flex justify-end">
+        <q-btn
+          flat
+          label="Regresar"
+          style="color: #1976d2; background-color: white; margin: 2px"
+          @click="goHome"
+        />
+        <q-btn
+          style="color: #1976d2; background-color: white; margin: 2px"
+          label="Ir a Seguimiento"
+          :disable="!selectedPatientId"
+          @click="goToSeguimiento"
+        />
+      </div>
+      <div v-else-if="mode === 'nuevo'" class="col-12 flex justify-end">
+        <q-btn
+          flat
+          label="Regresar"
+          style="color: #1976d2; background-color: white; margin: 2px"
+          @click="goHome"
+        />
+        <q-btn
+          label="Guardar y continuar a Seguimiento"
+          :loading="loading"
+          style="color: #1976d2; background-color: white; margin: 2px"
+          @click="guardarNuevo"
+        />
+      </div>
+
+      <q-toolbar-title> </q-toolbar-title>
+
+      <div></div>
+    </q-toolbar>
+  </q-header>
   <q-page class="q-pa-lg ives-bg">
     <!-- 1) DIÁLOGO INICIAL -->
     <q-dialog v-model="choiceDialog" persistent>
@@ -14,9 +52,9 @@
                 class="q-pa-md items-center column"
                 @click="setMode('nuevo')"
               >
-                <q-avatar size="56px" class="bg-green-1 text-green"
-                  ><q-icon name="person_add"
-                /></q-avatar>
+                <q-avatar size="56px" class="bg-green-1 text-green">
+                  <q-icon name="person_add" />
+                </q-avatar>
                 <div class="q-mt-sm text-center">Nueva consulta</div>
               </q-card>
             </div>
@@ -27,9 +65,9 @@
                 class="q-pa-md items-center column"
                 @click="setMode('seguimiento')"
               >
-                <q-avatar size="56px" class="bg-blue-1 text-blue"
-                  ><q-icon name="history"
-                /></q-avatar>
+                <q-avatar size="56px" class="bg-blue-1 text-blue">
+                  <q-icon name="history" />
+                </q-avatar>
                 <div class="q-mt-sm text-center">Dar seguimiento</div>
               </q-card>
             </div>
@@ -47,7 +85,7 @@
         <img :src="logo" alt="IVES" class="ives-logo" />
       </div>
 
-      <!-- 2A) MODO SEGUIMIENTO: SOLO SELECTOR DE PACIENTE -->
+      <!-- 2A) MODO SEGUIMIENTO: SOLO SELECTOR -->
       <div v-if="mode === 'seguimiento'">
         <h2 class="ives-h2">DAR SEGUIMIENTO</h2>
         <q-card flat bordered class="q-pa-md">
@@ -65,19 +103,19 @@
             dense
             @filter="filterPatients"
           />
-          <div class="q-mt-md flex justify-end q-gutter-sm">
-            <q-btn flat label="Cancelar" @click="goHome" />
+          <!-- <div class="q-mt-md flex justify-end q-gutter-sm">
+            <q-btn flat label="Regresar" @click="goHome" />
             <q-btn
               color="primary"
               label="Ir a Seguimiento"
               :disable="!selectedPatientId"
               @click="goToSeguimiento"
             />
-          </div>
+          </div> -->
         </q-card>
       </div>
 
-      <!-- 2B) MODO NUEVO: FORMULARIO HISTORIA CLÍNICA -->
+      <!-- 2B) MODO NUEVO: HISTORIA CLÍNICA -->
       <div v-else-if="mode === 'nuevo'">
         <h2 class="ives-h2">HISTORIA CLINICA</h2>
 
@@ -87,23 +125,62 @@
             <span class="lbl">NOMBRE</span>
             <input v-model="form.nombre" class="ipt" type="text" />
           </div>
+
+          <!-- GÉNERO: combo autocompletable + valor libre -->
           <div class="ives-cell">
             <span class="lbl">GENERO</span>
-            <input v-model="form.genero" class="ipt" type="text" placeholder="F / M / Otro" />
+            <q-select
+              v-model="form.genero"
+              :options="generoOptions"
+              use-input
+              input-debounce="0"
+              hide-selected
+              fill-input
+              dense
+              borderless
+              @filter="filterGenero"
+              @new-value="onNewGenero"
+            >
+              <template #no-option>
+                <q-item>
+                  <q-item-section class="text-grey">
+                    Escribe y presiona Enter para capturar
+                  </q-item-section>
+                </q-item>
+              </template>
+            </q-select>
           </div>
 
+          <!-- FECHA NACIMIENTO con calendario -->
           <div class="ives-cell">
             <span class="lbl">FECHA NACIMIENTO:</span>
-            <input
+            <q-input
               v-model="form.fecha_nacimiento"
-              class="ipt"
-              type="text"
+              borderless
+              dense
+              mask="####-##-##"
               placeholder="YYYY-MM-DD"
-            />
+              @update:model-value="onDateChange"
+            >
+              <template #append>
+                <q-icon name="event" class="cursor-pointer">
+                  <q-popup-proxy transition-show="scale" transition-hide="scale">
+                    <q-date
+                      v-model="form.fecha_nacimiento"
+                      mask="YYYY-MM-DD"
+                      minimal
+                      @update:model-value="onDateChange"
+                    />
+                  </q-popup-proxy>
+                </q-icon>
+              </template>
+            </q-input>
           </div>
+
+          <!-- EDAD (se calcula automático) -->
           <div class="ives-cell">
             <span class="lbl">EDAD:</span>
-            <input v-model="form.edad" class="ipt" type="text" />
+            <input v-model="form.edad" class="ipt" type="text" readonly />
           </div>
 
           <div class="ives-cell ives-span-2">
@@ -131,7 +208,9 @@
         </div>
 
         <h3 class="ives-h3">MOTIVO DE CONSULTA</h3>
-        <div class="ives-textarea"><textarea v-model="form.motivo_consulta" /></div>
+        <div class="ives-textarea">
+          <textarea v-model="form.motivo_consulta"></textarea>
+        </div>
 
         <h3 class="ives-h3">ANTECEDENTES</h3>
         <div class="ives-table ives-antecedentes">
@@ -215,24 +294,26 @@
         </div>
 
         <h3 class="ives-h3">ANTECEDENTES HEREDITARIOS</h3>
-        <div class="ives-textarea"><textarea v-model="form.antecedentes_hered" /></div>
-
+        <div class="ives-textarea">
+          <textarea v-model="form.antecedentes_hered"></textarea>
+        </div>
+        <!--
         <div class="q-mt-lg flex justify-end q-gutter-sm">
-          <q-btn flat label="Cancelar" @click="goHome" />
+          <q-btn flat label="Regresar" @click="goHome" />
           <q-btn
             color="primary"
-            label="Guardar y continuar a Seguimiento"
+            label="Guardar y continuar a Seguimientof"
             :loading="loading"
             @click="guardarNuevo"
           />
-        </div>
+        </div> -->
       </div>
     </div>
   </q-page>
 </template>
 
 <script>
-import logo from 'assets/Logo_IVES-22 (2).jpg'
+import logo from 'assets/Logo_IVES-06.png'
 import { getDb } from 'boot/sqljs'
 
 export default {
@@ -245,9 +326,11 @@ export default {
       loading: false,
       choiceDialog: true,
       mode: null, // 'nuevo' | 'seguimiento'
+
       // seguimiento
       selectedPatientId: null,
       patientOptions: [],
+
       // nuevo
       form: {
         nombre: '',
@@ -282,27 +365,71 @@ export default {
         temp: '',
         antecedentes_hered: '',
       },
+
+      // opciones base de género
+      generoBaseOptions: ['Masculino', 'Femenino', 'Otro'],
+      generoOptions: ['Masculino', 'Femenino', 'Otro'],
     }
   },
   mounted() {
     this.ensureTables()
+  },
+  watch: {
+    // recalcula edad si cambias la fecha escribiendo
+    'form.fecha_nacimiento'(val) {
+      this.form.edad = this.calcAge(val) ?? ''
+    },
   },
   methods: {
     setMode(m) {
       this.mode = m
       this.choiceDialog = false
     },
-
     goHome() {
       this.$router.push('/')
     },
-
     goToSeguimiento() {
       if (!this.selectedPatientId) {
         this.$q.notify({ type: 'warning', message: 'Selecciona un paciente' })
         return
       }
       this.$router.push({ name: 'Seguimiento', params: { pacienteId: this.selectedPatientId } })
+    },
+
+    // === Género: autocompletable + libre ===
+    filterGenero(val, update) {
+      update(() => {
+        const needle = (val || '').toLowerCase()
+        this.generoOptions = this.generoBaseOptions.filter((o) => o.toLowerCase().includes(needle))
+      })
+    },
+    onNewGenero(val, done) {
+      const v = String(val || '').trim()
+      if (!v) {
+        done()
+        return
+      }
+      const exists = this.generoBaseOptions.some((o) => o.toLowerCase() === v.toLowerCase())
+      if (!exists) this.generoBaseOptions.push(v)
+      this.generoOptions = this.generoBaseOptions.slice()
+      done(v)
+      this.form.genero = v
+    },
+
+    // === Fecha / Edad ===
+    onDateChange() {
+      this.form.edad = this.calcAge(this.form.fecha_nacimiento) ?? ''
+    },
+    calcAge(yyyyMMdd) {
+      if (!yyyyMMdd || !/^\d{4}-\d{2}-\d{2}$/.test(yyyyMMdd)) return null
+      const [y, m, d] = yyyyMMdd.split('-').map((n) => parseInt(n, 10))
+      const birth = new Date(y, m - 1, d)
+      if (isNaN(birth.getTime())) return null
+      const today = new Date()
+      let age = today.getFullYear() - birth.getFullYear()
+      const mo = today.getMonth() - birth.getMonth()
+      if (mo < 0 || (mo === 0 && today.getDate() < birth.getDate())) age--
+      return age < 0 ? 0 : age
     },
 
     // ====== DB / ESQUEMA ======
@@ -351,18 +478,18 @@ export default {
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           paciente_id INTEGER NOT NULL,
           fecha TEXT DEFAULT (datetime('now')),
-          tipo TEXT,          -- 'primera' | 'seguimiento'
+          tipo TEXT,
           motivo TEXT,
           signos_peso TEXT, signos_ta TEXT, signos_fc TEXT, signos_temp TEXT, signos_estatura TEXT, signos_imc TEXT,
           detalles TEXT
         );
       `)
-      // seguimientos (para la otra página)
+      // seguimientos (reservado)
       db.run(`
         CREATE TABLE IF NOT EXISTS seguimientos (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           consulta_id INTEGER NOT NULL,
-          exploracion TEXT,   -- JSON
+          exploracion TEXT,
           rutina_dia TEXT,
           rutina_noche TEXT,
           tratamiento TEXT,
@@ -402,7 +529,7 @@ export default {
       return row
     },
 
-    // ====== GUARDAR NUEVO Y REDIRIGIR A SEGUIMIENTO ======
+    // ====== GUARDAR NUEVO Y REDIRIGIR ======
     async guardarNuevo() {
       if (!this.form.nombre) {
         this.$q.notify({ type: 'warning', message: 'Nombre requerido' })
@@ -412,7 +539,7 @@ export default {
       try {
         const db = getDb()
 
-        // 1) Paciente
+        // 1) paciente
         const st = db.prepare(`
           INSERT INTO pacientes
             (nombre,genero,fecha_nacimiento,edad,direccion,ciudad_origen,profesion,celular,email,alergias,antecedentes)
@@ -435,7 +562,7 @@ export default {
         const row = this.q1('SELECT last_insert_rowid() AS id')
         const pacienteId = row?.id
 
-        // 2) Consulta inicial
+        // 2) consulta inicial
         const stc = db.prepare(`
           INSERT INTO consultas
             (paciente_id, tipo, motivo, signos_peso, signos_ta, signos_fc, signos_temp, signos_estatura, signos_imc, detalles)
@@ -454,7 +581,7 @@ export default {
         ])
         stc.free()
 
-        // 3) Persistir a disco si hay Electron
+        // 3) persistir si hay Electron
         try {
           if (window?.electronAPI?.writeDb) {
             const data = db.export()
@@ -462,10 +589,11 @@ export default {
           }
         } catch (e) {
           console.log(e)
+
+          /* sin electron */
         }
 
         this.$q.notify({ type: 'positive', message: 'Guardado. Continúa con Seguimiento.' })
-        // 4) Redirigir a Seguimiento
         this.$router.push({ name: 'Seguimiento', params: { pacienteId } })
       } catch (e) {
         console.error(e)
@@ -519,9 +647,10 @@ export default {
   margin: 8px 0 6px;
 }
 .ives-logo {
-  height: 64px;
+  height: 120px;
   object-fit: contain;
 }
+
 .ives-h2 {
   color: var(--ives-accent);
   letter-spacing: 0.35em;
@@ -565,6 +694,7 @@ export default {
 .ives-grid .ives-cell.ives-span-2 {
   border-right: none;
 }
+
 .lbl {
   font-size: 12px;
   color: var(--ives-text);
@@ -607,6 +737,7 @@ export default {
 
 .ives-textarea {
   border: 2px solid var(--ives-line);
+  border-block: black;
   background: var(--ives-cellbg);
   padding: 8px;
 }

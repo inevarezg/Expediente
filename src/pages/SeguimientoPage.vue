@@ -1,4 +1,23 @@
 <template>
+  <q-header elevated>
+    <q-toolbar style="background-color: #c4b193">
+      <div class="col-12 flex justify-end">
+        <q-btn
+          flat
+          label="Regresar"
+          style="color: #1976d2; background-color: white; margin: 2px"
+          @click="$router.push('/')"
+        />
+        <q-btn
+          label="Guardar seguimiento"
+          :loading="loading"
+          style="color: #1976d2; background-color: white; margin: 2px"
+          @click="guardarSeguimiento"
+        />
+      </div>
+    </q-toolbar>
+  </q-header>
+
   <q-page class="q-pa-lg ives-bg">
     <div class="ives-sheet">
       <div class="ives-logo-wrap">
@@ -63,7 +82,7 @@
         </div>
       </div>
 
-      <!-- RUTINA (siempre nueva) -->
+      <!-- RUTINA -->
       <h3 class="ives-h3">RUTINA</h3>
       <div class="ives-table">
         <div class="rutina-grid">
@@ -78,20 +97,16 @@
         </div>
       </div>
 
-      <!-- TRATAMIENTO (siempre nuevo) -->
+      <!-- TRATAMIENTO -->
       <h3 class="ives-h3">TRATAMIENTO:</h3>
       <div class="ives-table">
         <textarea v-model="form.tratamiento" class="trat-ta"></textarea>
       </div>
 
-      <div class="q-mt-lg flex justify-end q-gutter-sm">
-        <q-btn flat label="Regresar" @click="$router.push('/expedientes')" />
-        <q-btn
-          color="primary"
-          label="Guardar seguimiento"
-          :loading="loading"
-          @click="guardarSeguimiento"
-        />
+      <!-- COMENTARIO (se precarga y se puede editar/agregar más) -->
+      <h3 class="ives-h3">ANOTACIONES:</h3>
+      <div class="ives-table">
+        <textarea v-model="form.comentario" class="trat-ta"></textarea>
       </div>
     </div>
   </q-page>
@@ -109,19 +124,18 @@ export default {
       logo,
       loading: false,
       form: {
-        // Solo estos dos campos se precargan si hay algo previo:
         explChecks: [],
         explOtro: '',
-        // Estos SIEMPRE empiezan vacíos:
         rutDia: '',
         rutNoche: '',
         tratamiento: '',
+        comentario: '', // 👈 nuevo
       },
     }
   },
   mounted() {
     this.ensureTables()
-    this.cargarBaseExploracion() // <- solo exploración
+    this.cargarBaseExploracionYComentario()
   },
   methods: {
     ensureTables() {
@@ -133,8 +147,8 @@ export default {
           fecha TEXT DEFAULT (datetime('now')),
           tipo TEXT,
           motivo TEXT,
-          signos_peso TEXT, signos_ta TEXT, signos_fc TEXT, signos_temp TEXT, signos_estatura TEXT, signos_imc TEXT,
-          detalles TEXT
+          signos_peso TEXT, signos_ta TEXT, signos_fc TEXT, signos_temp TEXT,
+          signos_estatura TEXT, signos_imc TEXT, detalles TEXT
         );
       `)
       db.run(`
@@ -145,9 +159,17 @@ export default {
           rutina_dia TEXT,
           rutina_noche TEXT,
           tratamiento TEXT,
+          comentario TEXT,
           created_at TEXT DEFAULT (datetime('now'))
         );
       `)
+      try {
+        db.run('ALTER TABLE seguimientos ADD COLUMN comentario TEXT;')
+      } catch (e) {
+        console.log(e)
+
+        /* ya existe */
+      }
     },
 
     q1(sql, params = []) {
@@ -159,86 +181,75 @@ export default {
       return row
     },
 
-    /**
-     * Precarga SOLO la última EXPLORACIÓN del paciente (si existe).
-     * Rutina y Tratamiento se quedan vacíos siempre.
-     */
-    cargarBaseExploracion() {
-      // última consulta del paciente
+    cargarBaseExploracionYComentario() {
       const lastConsulta = this.q1(
         'SELECT id FROM consultas WHERE paciente_id = ? ORDER BY id DESC LIMIT 1',
         [this.pacienteId],
       )
       if (!lastConsulta) return
 
-      // último seguimiento de esa consulta
       const seg = this.q1(
-        'SELECT exploracion FROM seguimientos WHERE consulta_id = ? ORDER BY id DESC LIMIT 1',
+        'SELECT exploracion, comentario FROM seguimientos WHERE consulta_id = ? ORDER BY id DESC LIMIT 1',
         [lastConsulta.id],
       )
-      if (!seg || !seg.exploracion) return
 
-      try {
-        const exp = JSON.parse(seg.exploracion)
-        this.form.explChecks = Array.isArray(exp.checks) ? exp.checks : []
-        this.form.explOtro = exp.otro || ''
-      } catch (e) {
-        console.log(e)
+      if (!seg) return
 
-        // si el JSON estuviera corrupto, no llenamos nada
+      // precargar exploración (como original)
+      if (seg.exploracion) {
+        try {
+          const exp = JSON.parse(seg.exploracion)
+          this.form.explChecks = Array.isArray(exp.checks) ? exp.checks : []
+          this.form.explOtro = exp.otro || ''
+        } catch (e) {
+          console.log(e)
+        }
       }
 
-      // IMPORTANTE: NO tocar rutDia, rutNoche, tratamiento (quedan vacíos)
-      this.form.rutDia = ''
-      this.form.rutNoche = ''
-      this.form.tratamiento = ''
+      // precargar comentario
+      this.form.comentario = seg.comentario || ''
     },
 
     async guardarSeguimiento() {
       this.loading = true
       try {
         const db = getDb()
-
-        // crear nueva consulta tipo seguimiento (queda en historial)
-        const stc = db.prepare(
-          'INSERT INTO consultas (paciente_id, tipo) VALUES (?, "seguimiento")',
-        )
-        stc.run([this.pacienteId])
-        stc.free()
+        db.run('INSERT INTO consultas (paciente_id, tipo) VALUES (?, "seguimiento")', [
+          this.pacienteId,
+        ])
         const last = this.q1('SELECT last_insert_rowid() AS id')
         const consultaId = last?.id
 
-        // exploración actual (checks + otro)
         const exploracion = JSON.stringify({
           checks: this.form.explChecks,
           otro: this.form.explOtro,
         })
 
-        const sts = db.prepare(`
-          INSERT INTO seguimientos (consulta_id, exploracion, rutina_dia, rutina_noche, tratamiento)
-          VALUES (?, ?, ?, ?, ?)
-        `)
-        sts.run([
-          consultaId,
-          exploracion,
-          this.form.rutDia || null,
-          this.form.rutNoche || null,
-          this.form.tratamiento || null,
-        ])
-        sts.free()
+        db.run(
+          `INSERT INTO seguimientos (consulta_id, exploracion, rutina_dia, rutina_noche, tratamiento, comentario)
+           VALUES (?, ?, ?, ?, ?, ?)`,
+          [
+            consultaId,
+            exploracion,
+            this.form.rutDia || null,
+            this.form.rutNoche || null,
+            this.form.tratamiento || null,
+            this.form.comentario || null,
+          ],
+        )
 
-        // persistir si hay Electron
-        try {
-          if (window?.electronAPI?.writeDb) {
-            const data = db.export()
-            await window.electronAPI.writeDb(data)
-          }
-        } catch (r) {
-          console.log(r)
+        if (window?.electronAPI?.writeDb) {
+          const data = db.export()
+          await window.electronAPI.writeDb(data)
         }
 
-        this.$q.notify({ type: 'positive', message: 'Seguimiento guardado en el expediente' })
-        this.$router.push('/')
+        this.$q.notify({ type: 'positive', message: 'Seguimiento guardado correctamente' })
+        console.log(consultaId)
+
+        this.$router.push({
+          name: 'Receta',
+          params: { pacienteId: String(this.pacienteId), consultaId: String(consultaId) },
+        })
       } catch (e) {
         console.error(e)
         this.$q.notify({ type: 'negative', message: 'No se pudo guardar seguimiento' })
@@ -365,7 +376,6 @@ export default {
   font-size: 14px;
   color: var(--ives-text);
 }
-
 .trat-ta {
   width: 100%;
   min-height: 120px;
